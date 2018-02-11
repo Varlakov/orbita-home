@@ -1,0 +1,52 @@
+sitemap olga label="Main Menu"
+{
+	Frame{
+		Switch item=Lights mappings=[OFF="ВЫКЛ всё"] icon="light"
+		Switch item=gChild mappings=[OFF="Выкл всё"] icon="boy_1"
+		Switch item=gBedLights mappings=[OFF="Выкл всё"]  icon="bedroom"
+		Switch item=gLiving mappings=[OFF="Выкл всё"]  icon="sofa"
+	}
+	Frame {
+		Group item=gKitchen label="Кухня" icon="kitchen"
+		Group item=gBed label="Спальня" icon="bedroom"
+		Group item=gLiving label="Гостинная" icon="sofa"
+		Group item=gChild label="Детская" icon="boy_1"
+		Group item=gToilet label="Туалет" icon="toilet"
+		Group item=gCorridor label="Коридор" icon="corridor"
+		Group item=gBath label="Ванная" icon="bath"
+		Group item=gOffice label="Кабинет" icon="office"
+		Group item=gBalkony label="Лоджия" icon="garage"
+		Group item=gServernaya label="Серверная" icon="receiver"
+		Group item=gGarderob label="Гардеробная" icon="wardrobe"
+				
+		Text label="Термостаты" icon="chart" {
+			Text item=Weather_Temperature
+			Text item=Weather_Humidity
+			Frame label="Балкон" {
+				Setpoint item=Temp_Balkon_SetPoint minValue=0 maxValue=35 step=0.5
+				Text item=Temp_Balkon
+				Selection item=Temp_Balkon_Mode label="Режим работы" mappings=[0="Выкл", 1="Вкл", 2="Авто"]
+				Switch item=TPol_Office label="Состояние подогрева"
+
+				Switch item=TChart_Balkon_Period label="Chart Period" icon="chart" mappings=[0="Hour", 1="Day", 2="Week"]
+				Chart item=gTChart_Balkon period=h refresh=600  visibility=[TChart_Balkon_Period==0, TChart_Balkon_Period=="NULL"]
+				Chart item=gTChart_Balkon period=D refresh=3600 visibility=[TChart_Balkon_Period==1]
+				Chart item=gTChart_Balkon period=W refresh=3600 visibility=[TChart_Balkon_Period==2]
+			}
+			Frame label="Ванная" {
+				Setpoint item=Temp_Bath_SetPoint minValue=0 maxValue=35 step=0.5
+				Text item=Temp_Bathroom
+				Selection item=Temp_Bath_Mode label="Режим работы" mappings=[0="Выкл", 1="Вкл", 2="Авто"]
+				Switch item=TPol_Bath label="Состояние подогрева"
+
+				Switch item=TChart_Bath_Period label="Chart Period" icon="chart" mappings=[0="Hour", 1="Day", 2="Week"]
+				Chart item=gTChart_Bath period=h refresh=600  visibility=[TChart_Bath_Period==0, TChart_Bath_Period=="NULL"]
+				Chart item=gTChart_Bath period=D refresh=3600 visibility=[TChart_Bath_Period==1]
+				Chart item=gTChart_Bath period=W refresh=3600 visibility=[TChart_Bath_Period==2]
+			}
+		}
+	}
+	
+}
+
+// vim: syntax=Xtend

@@ -1,0 +1,6 @@
+yahooweather:weather:minsk [ location=834463, refresh=300 ]
+astro:sun:home   [ geolocation="53.9,27.56667", interval=60 ]
+astro:moon:home  [ geolocation="53.9,27.56667", interval=60 ]
+ntp:ntp:demo [ hostname="nl.pool.ntp.org", refreshInterval=60, refreshNtp=30 ]
+
+// vim: syntax=Xtend

@@ -1,0 +1,186 @@
+Group gDO
+Group gAO
+Group gRGB
+
+Group Status
+Group Shutters
+Group:Switch:OR(ON, OFF) Lights "Весь свет [(%d)]" (gDO)
+Group Cooler
+Group Heater
+Group gTChart_Balkon // гафик температуры балкона
+Group gTChart_Bath // гафик температуры ванной
+Group gTemperature
+Group gLED
+
+Group:Switch:OR(ON, OFF) gLiving     "Гостинная [(%d)]"   <video>
+Group:Switch:OR(ON, OFF) gKitchen    "Кухня [(%d)]"       <kitchen>
+Group:Switch:OR(ON, OFF) gToilet     "Туалет [(%d)]"      <toilet>
+Group:Switch:OR(ON, OFF) gCorridor   "Коридор [(%d)]"     <corridor>
+Group:Switch:OR(ON, OFF) gBath       "Ванная [(%d)]"      <bath>
+Group gOffice     "Кабинет"     <office>
+Group:Switch:OR(ON, OFF) gChild      "Детская [(%d)]"     <boy_1>
+Group:Switch:OR(ON, OFF) gBed        "Спальня [(%d)]"     <bedroom>
+Group gBalkony    "Лоджия"      <corridor>
+Group gServernaya "Серверная"   <server_room>
+Group gGarderob   "Гардеробная" <garderob>
+
+Group gChildLights "Свет в Детской" (gDO)
+Group:Switch:OR(ON, OFF) gBedLights  "Свет в Спальне [(%d)]"  (gDO)
+Group gCorridorLights  "Свет в Коридоре"  (gDO)
+Group gLivingLights  "Свет в Гостинной"  (gDO)
+Group:Switch:OR(ON, OFF) gBathLights  "Свет в Ванной"  (gDO)
+Group gKitchenLights  "Свет на Кухне"  (gDO)
+Group:Switch:OR(ON, OFF) gToiletLights  "Свет в Туалете"  (gDO)
+
+
+Number OutputsState             "Outputs"  // Out26:2453|Out28:4534|Out5:6435|Dimm78R:255
+
+Group  gVirtContact		"Virtual Contacts RS485"
+String CommandString    "Item that recieved command from RS485 Python" // Contact_0_1:DblClick
+//String Contact_26_2      "Contact_Child_Bra" (gVirtContact) ["Click:Light_Child_Bra:Toggle", "DblClick:Light_Child_Ceiling:Toggle","LongPress:gChildLights:OFF"]
+//String Contact_26_14     "Contact_Child_Ceiling" (gVirtContact) ["Click:Light_Child_Ceiling:Toggle", "LongPress:gChildLights:OFF"]
+//String Contact_28_12     "Contact_Child_Table" (gVirtContact) ["Click:Light_Child_Table:Toggle", "DblClick:Light_Child_Ceiling:Toggle","LongPress:gChildLights:OFF"]
+
+
+// itemtype itemname "labeltext [stateformat]" <iconname> (group1, group2, ...) ["tag1", "tag2", ...] {bindingconfig}
+
+// -------------  ДЕТСКАЯ -------------------------
+
+String Contact_5_3      "Contact_Child_Ceiling" (gVirtContact) ["SClick:Light_Child_Ceiling1:Toggle", "DblClick:Light_Child_Ceiling2:Toggle","LongPress:gChildLights:OFF"]
+String Contact_4_9      "Contact_Child_Bra"   (gVirtContact)  ["SClick:Light_Child_Bra:Toggle", "DblClick:Light_Child_Ceiling1:Toggle","LongPress:gChildLights:OFF"]
+String Contact_4_15      "Contact_Child_Table" (gVirtContact)   ["SClick:Light_Child_Table:Toggle", "DblClick:Light_Child_Ceiling1:Toggle","LongPress:gChildLights:OFF"]
+
+
+// String Contact_28_1     "Contact_Child_Table" (gVirtContact,Shutters) ["Press:Shutter_Bad:UP", "Release:Shutter_Bad:STOP","ShortPress:Shutter_Bad:UP"]
+// String Contact_28_2     "Contact_Child_Table" (gVirtContact,Shutters) ["Press:Shutter_Bad:DOWN", "Release:Shutter_Bad:STOP","ShortPress:Shutter_Bad:DOWN"]
+
+// String OutputsString		"Outputs state string"
+
+Switch Light_Child_Ceiling1     "Люстра"        (gDO, Lights, gChild, gChildLights) ["Lighting"]  {modbus="slave26:2"}
+Switch Light_Child_Ceiling2     "Дисколампа"    (gDO, Lights, gChild, gChildLights) ["Lighting"]  {modbus="slave26:3"} 
+Switch Light_Child_Bra         "Бра"            (gDO, Lights, gChild, gChildLights) ["Lighting"]  {modbus="slave26:1"}
+Switch Light_Child_Table       "Над столом"     (gDO, Lights, gChild, gChildLights) ["Lighting"]  {modbus="slave26:0"}
+
+// ---------  СПАЛЬНЯ --------------------
+
+String Contact_5_6      "Contact_Bed_Ceiling" (gVirtContact)   ["SClick:Light_Bed_Ceiling:Toggle", "DblClick:Light_Bed_Spot:Toggle","LongPress:gBedLights:OFF"]
+String Contact_4_2      "Contact_Bed_Bra_Right" (gVirtContact) ["SClick:Light_Bed_Bra_Right:Toggle", "DblClick:Light_Bed_Ceiling:Toggle","LongPress:gBedLights:OFF"]
+String Contact_4_1      "Contact_Bed_Bra_Left" (gVirtContact)  ["SClick:Light_Bed_Bra_Left:Toggle", "DblClick:Light_Bed_Ceiling:Toggle","LongPress:gBedLights:OFF"]
+
+String Contact_4_8      "Contact_Bed_Certain_UP" (gVirtContact,Shutters) ["Press_0:Shutter_Bed:UP", "Release:Shutter_Bed:STOP","ShortPress:Shutter_Bed:UP"]
+String Contact_4_7      "Contact_Bed_Certain_DOWN" (gVirtContact,Shutters) ["Press_0:Shutter_Bed:DOWN", "Release:Shutter_Bed:STOP","ShortPress:Shutter_Bed:DOWN"]
+
+Switch Light_Bed_Ceiling	"Люстра"      (gDO, Lights, gBed, gBedLights)  	["Lighting"] {modbus="slave28:5"}
+Switch Light_Bed_Bra_Right	"Бра справа"  (gDO, Lights, gBed, gBedLights)  	["Lighting"] {modbus="slave28:4"}
+Switch Light_Bed_Bra_Left	"Бра слева"   (gDO, Lights, gBed, gBedLights)	["Lighting"] {modbus="slave28:2"}
+Switch Light_Bed_Spot		"Точечный свет"   (gDO, Lights, gBed, gBedLights)	["Lighting"] {modbus="slave28:6"}
+Rollershutter Shutter_Bed   "Шторы"       (gBed, Shutters,gDO) 
+Switch Shutter_Bed_Up   "SBU" (gDO)    {modbus="[slaveR8:1:transformation=MAP(relay.map)]"}
+Switch Shutter_Bed_Down "SBD" (gDO)    {modbus="[slaveR8:3:transformation=MAP(relay.map)]"}
+Switch Shutter_Bed_Stop "SBS" (gDO)    {modbus="[slaveR8:2:transformation=MAP(relay.map)]"}
+
+
+//------------- ГОСТИННАЯ -----------------------------------------------------------------------
+String Contact_5_11      "Contact_Living_Ceiling_1" (gVirtContact)   ["SClick:Light_Living_Ceiling_1:Toggle", "DblClick:Light_Kitchen_Spot:Toggle","LongPress:gLivingLights:OFF"]
+String Contact_5_12      "Contact_Living_Ceiling_2" (gVirtContact)   ["SClick:Light_Living_Ceiling_2:Toggle", "DblClick:Light_Kitchen_Ceiling:Toggle","LongPress:gLivingLights:OFF"]
+String Contact_5_15      "Contact_Living_Spot_Left" (gVirtContact)  ["SClick:Light_Living_Spot_Left:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:gLivingLights:OFF"]
+String Contact_5_16      "Contact_Living_Spot_Right" (gVirtContact)   ["SClick:Light_Living_Spot_Right:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gLivingLights:OFF"]
+String Contact_4_6       "Contact_Living_Led" (gVirtContact) ["LongPress:Light_Living_Led:Toggle", "SClick:Light_Living_Led:CHANGE_BRIGHT"]
+
+
+Switch Light_Living_Ceiling_1	"Малый свет"   (gDO, Lights, gLiving,gLivingLights)  	["Lighting"] {modbus="slave28:9"}
+Switch Light_Living_Ceiling_2	"Большой свет" (gDO, Lights, gLiving,gLivingLights)  	["Lighting"] {modbus="slave28:10"}
+Switch Light_Living_Spot_Left	"Точечный ТВ"  (gDO, Lights, gLiving,gLivingLights)  	["Lighting"] {modbus="slave28:7"}
+Switch Light_Living_Spot_Right	"Точечный релакс"  (gDO, Lights, gLiving,gLivingLights)	["Lighting"] {modbus="slave28:8"}
+Dimmer Light_Living_Led		"Лента"   	   (gAO, gLED, Lights, gLiving,gLivingLights)	["Lighting"] {modbus="[slave77:1:transformation=JS(mlt255.js)]"}
+
+
+// ---------------- КУХНЯ  -------------------------------------
+
+String Contact_5_10      "Contact_Kitchen_Spot" (gVirtContact)   ["SClick:Light_Kitchen_Spot:Toggle", "DblClick:Light_Kitchen_Ceiling:Toggle","LongPress:gKitchenLights:OFF"]
+String Contact_4_16      "Contact_Kitchen_Spot_Left" (gVirtContact)   ["SClick:Light_Kitchen_Spot_Left:Toggle", "DblClick:Light_Kitchen_Ceiling:Toggle","LongPress:gKitchenLights:OFF"]
+String Contact_5_13      "Contact_Kitchen_Ceiling" (gVirtContact)   ["SClick:Light_Kitchen_Ceiling:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:gKitchenLights:OFF"]
+
+
+Switch Light_Kitchen_Ceiling	"Люстра"	(gDO, Lights, gKitchen, gKitchenLights)  ["Lighting"] {modbus="slave28:3"}
+Switch Light_Kitchen_Spot	    "Точечный"	(gDO, Lights, gKitchen, gKitchenLights)  ["Lighting"]     {modbus="slave28:0"}   
+Switch Light_Kitchen_Spot_Left	"Хрусталь"	(gDO, Lights, gKitchen, gKitchenLights)	 ["Lighting"]  {modbus="slave28:1"}
+// Switch Light_Kitchen_Led	"Лента"   	( Lights, gKitchen)
+
+
+// ---------------- ТУАЛЕТ  ------------------------------------- 
+
+String Contact_4_5      "Contact_Toilet_Spot" (gVirtContact)   ["SClick:Light_Toilet_Spot:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gToiletLights:OFF"]
+String Contact_5_14      "Contact_Toilet_Cooler" (gVirtContact)   ["SClick:Light_Toilet_Cooler:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:gToiletLights:OFF"]
+
+String Contact_5_7     "Contact_Toilet_Led" (gVirtContact) ["SClick:Light_Toilet_Led:CHANGE_BRIGHT", "DblClick:Light_Toilet_Led:Toggle","LongPress:gToiletLights:OFF"]
+
+Switch Light_Toilet_Spot	"Точечный"	(gDO, Lights, gToilet, gToiletLights)  ["Lighting"] {modbus="slave26:10"}
+Switch Light_Toilet_Cooler	"Вентилятор"	(gDO, Cooler, gToilet)  ["Switchable"] {modbus="slave26:8"}
+Dimmer Light_Toilet_Led	"Лента"  	   (gAO, gLED, Lights, gToilet, gToiletLights)	["Lighting"] {modbus="[slave77:2:transformation=JS(mlt255.js)]"}
+
+
+// ---------------- КОРИДОР  -------------------------------------
+
+String Contact_5_9      "Contact_Corridor_Ceiling" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:Lights:OFF"]
+String Contact_4_13     "Contact_Corridor_Ceiling2" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Garderob_Ceiling:Toggle","LongPress:Lights:OFF"]
+
+String Contact_4_12     "Contact_Corridor_Spot" (gVirtContact)   ["SClick:Light_Corridor_Spot:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
+
+Switch Light_Corridor_Ceiling	"Люстра"	(gDO, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="slave26:5"}
+Switch Light_Corridor_Spot	"Точечный"	(gDO, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="slave26:6"}
+Switch Light_Corridor_Bra	"Бра"  		(gDO, Lights, gCorridor, gCorridorLights)  	["Lighting"] {modbus="slave26:4"}
+Switch Light_Garderob_Ceiling	"Свет"		(gDO, Lights, gGarderob)	["Lighting"] {modbus="slave28:11"}
+// Switch Light_Corridor_Led	"Лента"   	( Lights, gCorridor)
+
+// ----------------- ВАННАЯ -----------------------------------
+
+String Contact_5_1      "Contact_Bath_Spot" (gVirtContact)   ["SClick:Light_Bath_Spot:Toggle", "LongPress:gBathLights:OFF"]
+String Contact_5_8      "Contact_Bath_Cooler" (gVirtContact)   ["SClick:Light_Bath_Cooler:Toggle", "LongPress:gBathLights:OFF"]
+
+
+Switch Light_Bath_Mirror	"Зеркало"	(gDO, Lights, gBath, gBathLights)	["Lighting"] {modbus="slave26:7"}
+Switch Light_Bath_Spot		"Точечный"	(gDO, Lights, gBath, gBathLights)	["Lighting"]  {modbus="slave26:13"}
+Switch Light_Bath_Cooler	"Вентилятор"	(gDO, Cooler, gBath) ["Switchable"]	 {modbus="slave26:9"}
+
+Number Temp_Bathroom      "Температура ванная [%.1f °C]"  <temperature> (gAO, gBath, gTChart_Bath, gTemperature) ["CurrentTemperature"]  {modbus="<[slave8_2:0:transformation=JS(div10.js)]"}
+Number Temp_Bath_SetPoint "Заданная температура Ванной [%.1f °C]"  <temperature> (gBath, gTChart_Bath)
+Switch TPol_Bath    "Теплый пол" (gDO, gBath)  // {modbus="<[slaveR8:4],>[slaveR8:4:transformation=MAP(relay.map)]"}  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Switch Light_Bath_Color         "Цветная подсветка" (gDO, Lights, gBath, gBathLights)
+Dimmer Light_Bath_RGB_Red		"RGB Red"   	   (gAO, gLED, Lights, gBath, gBathLights)	{modbus="[slave80:0:transformation=JS(mlt255.js)]"}
+Dimmer Light_Bath_RGB_Green		"RGB Green"   	   (gAO, gLED, Lights, gBath, gBathLights)	{modbus="[slave80:1:transformation=JS(mlt255.js)]"}
+Dimmer Light_Bath_RGB_Blue		"RGB Blue"   	   (gAO, gLED, Lights, gBath, gBathLights)	{modbus="[slave80:2:transformation=JS(mlt255.js)]"}
+
+//Switch Heater_Bath		    "Подогрев"	(gDO, Heater, gBath)	["Device:30","DO:1"]
+//Switch Light_Bath_RGB		"Радуга"	(gRGB, Lights, gBath)  	["Device:"]
+
+
+// Switch Light_Office_Ceiling	"Люстра"	(gDO, Lights, gOffice)	["Device:30","DO:2"]
+// Switch Light_Office_Table	"Стол"		(gDO, Lights, gOffice)	["Device:30","DO:3"]
+// Switch Heater_Office	    "Подогрев"		(gDO, Heater, gOffice)	["Device:30","DO:4"]
+
+// Switch Light_Balkony_Ceiling	"Свет"		(gDO, Lights, gBalkony)	["Device:30","DO:5"]
+
+// ----------------------- SERVER -------------------------------
+String Contact_4_11      "Contact_Server_Ceiling" (gVirtContact)   ["SClick:Light_Servernaya_Ceiling:Toggle"]
+
+Switch Light_Servernaya_Ceiling	"Свет"		(gDO, Lights, gServernaya)	["Lighting"] {modbus="slave26:11"}
+Contact Sensor_Servernaya (gServernaya) {modbus="<[slaveDI28:5]"}
+Dimmer TEST_Light_Servernaya_Led		"Test Лента"   	   (gAO, gLED, Lights, gServernaya)	["Lighting"] {modbus="[slave77:0:transformation=JS(mlt255.js)]"}
+
+
+
+Number Temp_Balkon 	    "Температура балкона [%.1f °C]"  <temperature>  (gAO, gOffice, gTChart_Balkon, gTemperature) ["CurrentTemperature"]  {modbus="<[slave8:0:transformation=JS(div10.js)]"}
+Number Temp_Balkon_SetPoint "Заданная температура балкона [%.1f °C]"  <temperature>  (gOffice,gTChart_Balkon)
+Switch TPol_Office "Теплый пол" (gDO, gOffice) {modbus="<[slaveR8:4],>[slaveR8:4:transformation=MAP(relay.map)]"}
+
+
+Number TChart_Bath_Period     "Chart Period"
+Number TChart_Balkon_Period     "Chart Period"
+Number Temp_Balkon_Mode     "Режим работы"
+Number Temp_Bath_Mode     "Режим работы"
+
+
+Number Weather_Temperature   "Температура на улице [%.1f °C]" <temperature> ["CurrentTemperature"] { channel="yahooweather:weather:minsk:temperature" }
+Number Weather_Humidity      "Влажность на улице [%.1f]" <humidity> { channel="yahooweather:weather:minsk:humidity" }
