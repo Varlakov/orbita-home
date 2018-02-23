@@ -1,4 +1,3 @@
-import java.lang.Number
 import java.util.Random
 import org.openhab.core.library.types.*
 import org.openhab.model.script.actions.*
@@ -13,12 +12,41 @@ import java.lang.Integer
 import java.util.Set
 import java.util.Map
 import java.util.HashMap
+import java.util.concurrent.locks.ReentrantLock
+
+val ReentrantLock stompingLock = new ReentrantLock
+
+var String sExpr = "<id1>.*<s2>(.*)</s2>.*"
 
 var Timer timer = null
-var Timer serverTimer = null
+val resList = newArrayList("640/480", "320/240", "480/360")
+val urlList = newArrayList("http://www.fillmurray.com", "http://www.fillmurray.com/g",
+                 "http://www.placecage.com", "http://www.placecage.com/c", "http://www.placecage.com/g")
 val Random random = new Random()
+val flgSW=0
+
 val Map<String, Integer> mapDimmerState = new HashMap<String, Integer>()
 
+var Timer mdTimerServernaya = null
+var Timer mdTimerBathCooler = null
+
+/**
+ * This is a demo rule which simulates a real dimmer by reacting to increase/decrease commands
+ * and posting an updated state on the bus
+ */
+/*
+rule "Set random room temperatures"
+	when
+		System started or
+		Time cron "0/1 * * * * ?"
+	then
+		Temperature?.members.forEach(temperature|
+			postUpdate(temperature, 20.0 + (25.0 - (Math::random * 50.0).intValue) / 10.0)
+		)
+
+
+end
+*/
 rule "Init LED dimmer state"
 	when
 		System started
@@ -30,27 +58,11 @@ rule "Init LED dimmer state"
         mapDimmerState.put(item.name, 0)
     }
 
-end
-
-
-
-rule "Light_FF_Bed_Ceiling State"
-        when
-                Item Light_FF_Bed_Ceiling received update
-        then
-                if (Light_FF_Bed_Ceiling.state == ON) {
-
-                        var State = OutputsState.state as DecimalType
-                        var Pos   = State.toBigDecimal.toBigInteger.intValue.bitwiseOr(2)
-                        postUpdate(OutputsState,Pos)
-
-                } else {
-                         var State = OutputsState.state as DecimalType
-                         var Pos   = State.toBigDecimal.toBigInteger.intValue.bitwiseAnd(-3)
-                          postUpdate(OutputsState,Pos)
-                }
+    Temp_Balkon_Mode.sendCommand(0)
 
 end
+
+
 /*
 rule "Light_FF_Child_Ceiling State"
         when
@@ -108,17 +120,17 @@ rule "Contact_0_1"
         then
             
             if(receivedCommand == UP){
-                logInfo("SHUTTER_UP",Shutter_Bed.state.toString())
+//                logInfo("SHUTTER_UP",Shutter_Bed.state.toString())
                 sendCommand(Shutter_Bed_Up,ON)
                 createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Up, OFF) ]
             }
 		    else if(receivedCommand == DOWN){
-                logInfo("SHUTTER_DOWN",Shutter_Bed.state.toString())
+ //               logInfo("SHUTTER_DOWN",Shutter_Bed.state.toString())
                 sendCommand(Shutter_Bed_Down,ON)
                 createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Down, OFF) ]
             }
 		    else if(receivedCommand == STOP){
-                logInfo("SHUTTER_STOP",Shutter_Bed.state.toString())
+ //               logInfo("SHUTTER_STOP",Shutter_Bed.state.toString())
                 sendCommand(Shutter_Bed_Stop,ON)
                 createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Stop, OFF) ]
             }
@@ -129,141 +141,165 @@ rule "Execute Contact"
     when
         Item CommandString received update
     then
+        var String sCommand
+        try {
+            stompingLock.lock()
+            sCommand = new String(CommandString.state.toString)	
+        }
+        catch(Throwable t){}
+        finally{
+            stompingLock.unlock()
+        }
+        
+        var List<String> sArray = sCommand.split(":")
+        logInfo("Execute Contact",sCommand)
+//        logInfo("Execute Contact",sArray.get(0).toString)
+//        logInfo("Execute Contact",sArray.get(1).toString)
+        
 
-        logInfo("RULE_EXEC_CONTACT", CommandString.state.toString)
-        var List<String> sArray = CommandString.state.toString.split(":")
-        
-        var slectedItem = gVirtContact.members.filter(mem | mem.name == sArray.get(0)).head as GenericItem
-        if(slectedItem == null)
-        {
-            logWarn("RULE_EXEC_CONTACT", "No item " + sArray.get(0))
-            return false
+        //var  Cntr as Item
+        var String swName = "0"
+        var String sCmdType = "0"
+        //val itm
+     
+        val String cmdTag = gVirtContact.members.filter(mem | mem.name == sArray.get(0)).head.tags.filter(tg | tg.contains(sArray.get(1))).toString as String
+        logInfo("TAGS_FLTR1",sCommand)
+        if (cmdTag.length <3 ){
+            return  0
         }
-        
-        var cmdTag = slectedItem.tags.filter(tg | tg.contains(sArray.get(1))).head as String
-        if (cmdTag == null || cmdTag.isEmpty())
-        {
-            logWarn("RULE_EXEC_CONTACT", "No tag " + sArray.get(1))
-            return false
-        }
-        
+
         var List<String> tagArray = cmdTag.split(":")
-        if(tagArray.length < 3)
-        {
-            logWarn("RULE_EXEC_CONTACT", "Configuration error " + cmdTag)
-            return false
-        }
 
-        logInfo("RULE_EXEC_CONTACT", "Tag " + cmdTag)
-        var String sCmdType = tagArray.get(2)
+//        logInfo("TAGS_FLTR2",tagArray.get(2))
 
-        // сначала ищем item среди выключателей освещения (цифровые выходы)
-        var itSW = gDO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
-        if (itSW != null)
-        {
-            if(sCmdType.contains("Toggle"))
-            {
-                if (itSW.state == ON)
+        sCmdType = tagArray.get(2)
+
+// сначала ищем item среди выключателей освещения (цифровые выходы)
+        val itSW = gDO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
+        
+        if (itSW != null){
+            if(sCmdType.contains("Toggle")){
+                
+//                logInfo("SW_NAME",itSW.name)
+//                logInfo("SW_STATE",itSW.state.toString)
+
+                if (itSW.state == ON){
                     itSW.sendCommand(OFF)
-                else
+                }
+                else{
                     itSW.sendCommand(ON)
+                }
             }
             else if (sCmdType.contains("OFF"))
-                itSW.sendCommand(OFF)
-            else if (sCmdType.contains("ON"))
+            {
+//                logInfo("OFF_PROCESSOR2",itSW.toString)
+                sendCommand(itSW,OFF)
+            }
+            else if (sCmdType.contains("ON")){
+//                logInfo("ON_PROCESSOR",itSW.toString)
                 itSW.sendCommand(ON)
-            else if (sCmdType.contains("DOWN"))
+            }
+            else if (sCmdType.contains("DOWN")){
+//                logInfo("DOWN_PROCESSOR",itSW.toString)
                 itSW.sendCommand(DOWN)
-            else if (sCmdType.contains("UP"))
+            }
+            else if (sCmdType.contains("UP")){
+//                logInfo("DOWN_PROCESSOR",itSW.toString)
                 itSW.sendCommand(UP)
-            else if (sCmdType.contains("STOP"))
+            }
+            else if (sCmdType.contains("STOP")){
+//                logInfo("DOWN_PROCESSOR",itSW.toString)
                 itSW.sendCommand(STOP)
+            }
+            
             else
-                logWarn("RULE_EXEC_CONTACT", "Config error " + sCmdType)
-
-            return true
+            {
+                 logInfo("ERROR in config Items",sArray.get(0))
+               
+            }
         } 
 
-        var itDimm = gAO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
-        if (itDimm != null)
-        {
-            var currentBright = 0
-            if(itDimm.state instanceof PercentType)
-            {
-                var currentState = itDimm.state as PercentType
-                currentBright = currentState.intValue
-            }
+         val itDimm = gAO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
+        
+        if (itDimm != null){
 
-            var prevVal = mapDimmerState.get(itDimm.name)
-            if(prevVal == null)
-            {
-                logWarn("RULE_EXEC_CONTACT", "Prev value is undef")
-            //         prevVal = PercentType.ZERO.intValue
-            }
-            mapDimmerState.replace(itDimm.name, currentBright)
+//            logInfo("SW_NAME",itDimm.name)
+//            logInfo("SW_STATE",itDimm.state.toString)
+//            logInfo("SW_PREV_STATE",previousState(itDimm, true, "jdbc").state.toString)
 
-            if (sCmdType.contains("CHANGE_BRIGHT"))
-            {
-                logInfo("RULE_EXEC_CONTACT", "Change bright command executing")
+//            val  prevState =  previousState(itDimm, true, "jdbc").state as DecimalType
+            val  brightState=itDimm.state as DecimalType
+                
+            var prevVal = mapDimmerState.get(itDimm.name) //prevState.toBigDecimal.toBigInteger.intValue
+            var bright = brightState.toBigDecimal.toBigInteger.intValue
 
-                if(currentBright ==100)
-                    currentBright = 75
-                else if (currentBright == 0)
-                    currentBright = 25
-                else if (currentBright >prevVal) 
-                {
-                    currentBright = currentBright + 25
-                    if (currentBright > 100)
-                        currentBright = 100
+            mapDimmerState.replace(itDimm.name,bright)
+
+            if (sCmdType.contains("CHANGE_BRIGHT")){
+//                logInfo("CHANGE_BRIGHT",itDimm.toString)
+
+                if(bright ==100){
+                    bright = 75
                 }
-                else 
-                {
-                    currentBright = currentBright - 25
-                    if(currentBright < 0)
-                        currentBright = 0
+                else if (bright == 0){
+                    bright = 25
+                }                
+                else if (bright >prevVal) {
+                    bright = bright + 25
+                    if (bright > 100)
+                        bright = 100
                 }
-                itDimm.sendCommand(currentBright) 
+                else {
+                    bright = bright -25
+                    if(bright < 0)
+                         bright = 0
+                }
+                 itDimm.sendCommand(bright) 
+                    
             }
-            else if (sCmdType.contains("Toggle"))
-            {
-                logInfo("RULE_EXEC_CONTACT", "Toggle command executing")
+            else if (sCmdType.contains("Toggle")){
+//                logInfo("TOGGLE",itDimm.toString)
 
-                if (currentBright > 0)
-                    currentBright = 0
-                else
-                {
-                    if (prevVal == 0)
-                        currentBright = 25
-                    else
-                        currentBright = prevVal
+                if (bright > 0){
+                    bright = 0
                 }
-                itDimm.sendCommand(currentBright)
+                else{
+                    if (prevVal == 0){
+                        bright = 25
+                    }
+                    else{
+                        bright = prevVal
+                    }
+                    
+                }
+                itDimm.sendCommand(bright)
             }
         }
+    
 end
 
-// rule "Termostat Balkon1"
-//         when 
-//                 Item Temp_Balkon_SetPoint received update or
-//                 Item Temp_Balkon received update or
-//                 Item Temp_Balkon_Mode received update
-//         then
+rule "Termostat Balkon"
+        when 
+                Item Temp_Balkon_SetPoint received update or
+                Item Temp_Balkon received update or
+                Item Temp_Balkon_Mode received update
+        then
 
-//                 if((Temp_Balkon_Mode.state as DecimalType).intValue == 2)
-//                 {
+                if((Temp_Balkon_Mode.state as DecimalType).intValue == 2)
+                {
 
-//                     var TempSP = (Temp_Balkon_SetPoint.state as DecimalType).floatValue
-//                     var TempLoft = (Temp_Balkon.state as DecimalType).toBigDecimal.floatValue
+                    var TempSP = (Temp_Balkon_SetPoint.state as DecimalType).floatValue
+                    var TempLoft = (Temp_Balkon.state as DecimalType).toBigDecimal.floatValue
 
 
-//                     if ( (TempSP - TempLoft)>0.2) {
-//                             sendCommand(TPol_Office, ON)
-//                     }
-//                     else if ( (TempLoft-TempSP)>0.2) {
-//                             sendCommand(TPol_Office, OFF)
-//                     }
-//                 }
-// end
+                    if ( (TempSP - TempLoft)>0.2) {
+                            sendCommand(TPol_Office, ON)
+                    }
+                    else if ( (TempLoft-TempSP)>0.2) {
+                            sendCommand(TPol_Office, OFF)
+                    }
+                }
+end
 
 rule "Termostat Balkone change mode"
 when
@@ -279,35 +315,35 @@ then
     
 end
 
-// rule "RGB Set random color1"
-// 	when
-// 		Time cron "0/1 * * * * ?"
-// 	then
-//         if(Light_Bath_Color.state == ON) {
-//             sendCommand(Light_Bath_RGB_Red, (Math::random * 100).intValue )
-//             sendCommand(Light_Bath_RGB_Green, (Math::random * 100).intValue )
-//             sendCommand(Light_Bath_RGB_Blue, (Math::random * 100).intValue )
-//         }
-// end
+rule "RGB Set random color"
+	when
+		Time cron "0/3 * * * * ?"
+	then
+        if(Light_Bath_Color.state == ON) {
+            sendCommand(Light_Bath_RGB_Red, (Math::random * 100).intValue )
+            sendCommand(Light_Bath_RGB_Green, (Math::random * 100).intValue )
+            sendCommand(Light_Bath_RGB_Blue, (Math::random * 100).intValue )
+        }
+end
 
-// rule "Bath Color1"
-// when
-//     Item Light_Bath_Color received update
-// then
-//     if(Light_Bath_Color.state == OFF  ) {
-//         sendCommand(Light_Bath_RGB_Red, OFF)
-//         sendCommand(Light_Bath_RGB_Green, OFF)
-//         sendCommand(Light_Bath_RGB_Blue, OFF)
+rule "Bath Color"
+when
+    Item Light_Bath_Color received update
+then
+    if(Light_Bath_Color.state == OFF  ) {
+        sendCommand(Light_Bath_RGB_Red, 0)
+        sendCommand(Light_Bath_RGB_Green, 0)
+        sendCommand(Light_Bath_RGB_Blue, 0)
         
-//     } 
+    } 
        
-// end
+end
 
 rule "Toilet Cooler"
 when
     Item gToiletLights changed from ON to OFF
 then
-    sendCommand(Light_Toilet_Cooler, ON)
+    sendCommand(Light_Toilet_Cooler,ON)
     // create a timer to turn the cooler off
     timer = createTimer(now.plusSeconds(300)) [|
         sendCommand(Light_Toilet_Cooler, OFF)
@@ -315,46 +351,51 @@ then
 end
 
 
-
-
-rule "React on Sensor_Servernaya change/update"
-when
-    Item Sensor_Servernaya changed to CLOSED
-then
-    logInfo("RULE_EXEC_SENSOR", "changed to CLOSED")
-
-    if(serverTimer == null || serverTimer.hasTerminated) 
-    {
-        if(Light_Servernaya_Ceiling.state == OFF)
-        {
-            logInfo("RULE_EXEC_SENSOR", "Light is OFF, timer is inactive")
-            Light_Servernaya_Ceiling.sendCommand(ON)
-
-            serverTimer = createTimer(now.plusSeconds(30), [| 
-                Light_Servernaya_Ceiling.sendCommand(OFF)
-                serverTimer = null
-            ])
-        }
-        else
-            logInfo("RULE_EXEC_SENSOR", "Light is ON")
-    }
-    else 
-    {
-        logInfo("RULE_EXEC_SENSOR", "timer is active")
-        serverTimer.reschedule(now.plusSeconds(30))
-    }
-
-end
-
-/*
-rule "Bath Cooler"
+rule "Bath Cooler OFF"
 when
     Item gBathLights changed from ON to OFF
 then
-    sendCommand(Light_Bath_Cooler,ON)
+//    sendCommand(Light_Bath_Cooler,ON)
+    mdTimerBathCooler.cancel()
     // create a timer to turn the cooler off
-    timer = createTimer(now.plusSeconds(30)) [|
+    timer = createTimer(now.plusSeconds(600)) [|
         sendCommand(Light_Bath_Cooler, OFF)
     ]
 end
-*/
+
+
+
+rule "Bath Cooler ON"
+when
+    Item gBathLights changed from OFF to ON
+then
+    // create a timer to turn the cooler on in 7 minutes
+    mdTimerBathCooler = createTimer(now.plusMinutes(10)) [|
+        sendCommand(Light_Bath_Cooler, ON)
+    ]
+end
+
+rule "Sensor Servernaya"
+when
+	Item Sensor_Servernaya received update
+then
+//	 logInfo("MOTION SENSOR","CLOSE")	
+	
+	if(Sensor_Servernaya.state == CLOSED)
+	{
+		 Light_Servernaya_Ceiling.sendCommand(ON)
+	}
+	else
+	{
+		if (mdTimerServernaya == null) {
+			mdTimerServernaya  = createTimer(now.plusMinutes(1 ), [|
+			Light_Servernaya_Ceiling.sendCommand(OFF)
+			mdTimerServernaya  = null
+			])
+		}
+		else{
+	 		mdTimerServernaya.reschedule(now.plusMinutes(1 ))
+		}
+	}
+
+end

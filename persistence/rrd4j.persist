@@ -1,0 +1,15 @@
+// persistence strategies have a name and a definition and are referred to in the "Items" section
+Strategies {
+	// for rrd charts, we need a cron strategy
+	everyMinute : "0 * * * * ?"
+}
+
+Items {
+	// DemoSwitch,NoOfLights,Window_GF_Toilet,Heating* : strategy = everyChange, everyMinute, restoreOnStartup
+	// Light_Toilet_Led, gChildLights* : strategy = everyChange, restoreOnStartup
+	 	
+	// let's only store temperature values in rrd
+	gTChart_Balkon*, gTChart_Bath* : strategy = everyMinute, restoreOnStartup
+	Temp_Bath_SetPoint,	Temp_Balkon_SetPoint, Temp_Bath_Mode, Temp_Balkon_Mode: strategy = everyChange, restoreOnStartup
+}
+// vim: syntax=Xtend

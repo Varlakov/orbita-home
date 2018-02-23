@@ -1,0 +1,212 @@
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import org.openhab.core.items.*
+import org.openhab.core.items.GenericItem
+
+rule "Therm1"
+	when
+		Item Temp_Bath_SetDay1 changed  or 
+        Item Temp_Bath_SetPoint1 changed  or
+        Item Temp_Bath_SetHour1 changed  or
+        Item Temp_Bath_SetMinute1 changed   
+	then
+
+    if (Temp_Bath_SetDay1.state == 0)
+    {
+        sTemp_Bath_Set1.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay1.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute1.state.toString
+
+        if(Temp_Bath_SetMinute1.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set1.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour1.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint1.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm2"
+	when
+		Item Temp_Bath_SetDay2 changed  or 
+        Item Temp_Bath_SetPoint2 changed  or
+        Item Temp_Bath_SetHour2 changed  or
+        Item Temp_Bath_SetMinute2 changed   
+	then
+
+    if (Temp_Bath_SetDay2.state == 0)
+    {
+        sTemp_Bath_Set2.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay2.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute2.state.toString
+
+        if(Temp_Bath_SetMinute2.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set2.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour2.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint2.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm3"
+	when
+		Item Temp_Bath_SetDay3 changed  or 
+        Item Temp_Bath_SetPoint3 changed  or
+        Item Temp_Bath_SetHour3 changed  or
+        Item Temp_Bath_SetMinute3 changed   
+	then
+
+    if (Temp_Bath_SetDay3.state == 0)
+    {
+        sTemp_Bath_Set3.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay3.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute3.state.toString
+
+        if(Temp_Bath_SetMinute3.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set3.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour3.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint3.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm4"
+	when
+		Item Temp_Bath_SetDay4 changed  or 
+        Item Temp_Bath_SetPoint4 changed  or
+        Item Temp_Bath_SetHour4 changed  or
+        Item Temp_Bath_SetMinute4 changed   
+	then
+
+    if (Temp_Bath_SetDay4.state == 0)
+    {
+        sTemp_Bath_Set4.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay4.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute4.state.toString
+
+        if(Temp_Bath_SetMinute4.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set4.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour4.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint4.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm1"
+	when
+		Item Temp_Bath_SetDay5 changed  or 
+        Item Temp_Bath_SetPoint5 changed  or
+        Item Temp_Bath_SetHour5 changed  or
+        Item Temp_Bath_SetMinute5 changed   
+	then
+
+    if (Temp_Bath_SetDay5.state == 0)
+    {
+        sTemp_Bath_Set5.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay5.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute5.state.toString
+
+        if(Temp_Bath_SetMinute6.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set6.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour6.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint6.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm7"
+	when
+		Item Temp_Bath_SetDay7 changed  or 
+        Item Temp_Bath_SetPoint7 changed  or
+        Item Temp_Bath_SetHour7 changed  or
+        Item Temp_Bath_SetMinute7 changed   
+	then
+
+    if (Temp_Bath_SetDay7.state == 0)
+    {
+        sTemp_Bath_Set7.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay7.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute7.state.toString
+
+        if(Temp_Bath_SetMinute7.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set7.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour7.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint7.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm8"
+	when
+		Item Temp_Bath_SetDay8 changed  or 
+        Item Temp_Bath_SetPoint8 changed  or
+        Item Temp_Bath_SetHour8 changed  or
+        Item Temp_Bath_SetMinute8 changed   
+	then
+
+    if (Temp_Bath_SetDay8.state == 0)
+    {
+        sTemp_Bath_Set8.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay8.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute8.state.toString
+
+        if(Temp_Bath_SetMinute8.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set8.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour8.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint8.state.toString+ "°C") 
+    }
+
+end
+
+rule "Therm9"
+	when
+		Item Temp_Bath_SetDay9 changed  or 
+        Item Temp_Bath_SetPoint9 changed  or
+        Item Temp_Bath_SetHour9 changed  or
+        Item Temp_Bath_SetMinute9 changed   
+	then
+
+    if (Temp_Bath_SetDay9.state == 0)
+    {
+        sTemp_Bath_Set9.postUpdate( "-")
+    }
+    else
+    {
+        var String sDayofWeek = transform("MAP","week.map",Temp_Bath_SetDay9.state.toString)
+        var String sMinutes = Temp_Bath_SetMinute9.state.toString
+
+        if(Temp_Bath_SetMinute9.state == 0){
+            sMinutes = "00"
+        }
+
+        sTemp_Bath_Set9.postUpdate( sDayofWeek+" в " + Temp_Bath_SetHour9.state.toString + ":" + sMinutes +" "+ Temp_Bath_SetPoint9.state.toString+ "°C") 
+    }
+
+end
