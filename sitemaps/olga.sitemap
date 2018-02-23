@@ -66,10 +66,10 @@ sitemap olga label="Main Menu"
 				Chart item=gTChart_Balkon period=W refresh=3600 visibility=[TChart_Balkon_Period==2]
 			}
 			Frame label="Ванная" {
-				Setpoint item=Temp_Bath_SetPoint minValue=0 maxValue=35 step=0.5
+				//Setpoint item=Temp_Bath_SetPoint minValue=0 maxValue=35 step=0.5
 				Text item=Temp_Bathroom
-				Selection item=Temp_Bath_Mode label="Режим работы" mappings=[0="Выкл", 1="Вкл", 2="Авто"]
-				Switch item=TPol_Bath label="Состояние подогрева"
+				//Selection item=Temp_Bath_Mode label="Режим работы" mappings=[0="Выкл", 1="Вкл", 2="Авто"]
+				//Switch item=TPol_Bath label="Состояние подогрева"
 
 				Switch item=TChart_Bath_Period label="Chart Period" icon="chart" mappings=[0="Hour", 1="Day", 2="Week"]
 				Chart item=gTChart_Bath period=h refresh=600  visibility=[TChart_Bath_Period==0, TChart_Bath_Period=="NULL"]

@@ -4,26 +4,17 @@ import org.openhab.model.script.actions.*
 import org.openhab.core.items.*
 import org.openhab.core.items.GenericItem
 import org.eclipse.smarthome.core.persistence.*
-import org.eclipse.smarthome.core.persistence.HistoricItem
 import java.lang.String
-import java.util.ArrayList
 import java.util.List 
 import java.lang.Integer
-import java.util.Set
 import java.util.Map
 import java.util.HashMap
 import java.util.concurrent.locks.ReentrantLock
 
 val ReentrantLock stompingLock = new ReentrantLock
 
-var String sExpr = "<id1>.*<s2>(.*)</s2>.*"
-
 var Timer timer = null
-val resList = newArrayList("640/480", "320/240", "480/360")
-val urlList = newArrayList("http://www.fillmurray.com", "http://www.fillmurray.com/g",
-                 "http://www.placecage.com", "http://www.placecage.com/c", "http://www.placecage.com/g")
 val Random random = new Random()
-val flgSW=0
 
 val Map<String, Integer> mapDimmerState = new HashMap<String, Integer>()
 
@@ -59,7 +50,6 @@ rule "Init LED dimmer state"
     }
 
     Temp_Balkon_Mode.sendCommand(0)
-
 end
 
 
@@ -151,132 +141,122 @@ rule "Execute Contact"
             stompingLock.unlock()
         }
         
-        var List<String> sArray = sCommand.split(":")
-        logInfo("Execute Contact",sCommand)
-//        logInfo("Execute Contact",sArray.get(0).toString)
-//        logInfo("Execute Contact",sArray.get(1).toString)
-        
+        //logInfo("RULE_EXEC_CONTACT", sCommand)
 
-        //var  Cntr as Item
-        var String swName = "0"
-        var String sCmdType = "0"
-        //val itm
-     
-        val String cmdTag = gVirtContact.members.filter(mem | mem.name == sArray.get(0)).head.tags.filter(tg | tg.contains(sArray.get(1))).toString as String
-        logInfo("TAGS_FLTR1",sCommand)
-        if (cmdTag.length <3 ){
-            return  0
+        var List<String> sArray = sCommand.split(":")
+        var slectedItem = gVirtContact.members.filter(mem | mem.name == sArray.get(0)).head as GenericItem
+        if(slectedItem == null)
+        {
+            //logWarn("RULE_EXEC_CONTACT", "No item " + sArray.get(0))
+            return false
+        }
+
+        var cmdTag = slectedItem.tags.filter(tg | tg.contains(sArray.get(1))).head as String
+        if (cmdTag == null || cmdTag.isEmpty())
+        {
+            //logWarn("RULE_EXEC_CONTACT", "No tag " + sArray.get(1))
+            return false
         }
 
         var List<String> tagArray = cmdTag.split(":")
+        if(tagArray.length < 3)
+        {
+            //logWarn("RULE_EXEC_CONTACT", "Configuration error " + cmdTag)
+            return false
+        }
 
-//        logInfo("TAGS_FLTR2",tagArray.get(2))
+        //logInfo("RULE_EXEC_CONTACT", "Tag " + cmdTag)
 
-        sCmdType = tagArray.get(2)
+        var String sCmdType = tagArray.get(2)
 
-// сначала ищем item среди выключателей освещения (цифровые выходы)
+        // сначала ищем item среди выключателей освещения (цифровые выходы)
         val itSW = gDO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
-        
-        if (itSW != null){
-            if(sCmdType.contains("Toggle")){
-                
-//                logInfo("SW_NAME",itSW.name)
-//                logInfo("SW_STATE",itSW.state.toString)
-
-                if (itSW.state == ON){
+        if (itSW != null)
+        {
+            if(sCmdType.contains("Toggle"))
+            {
+                if (itSW.state == ON)
                     itSW.sendCommand(OFF)
-                }
-                else{
+                else
                     itSW.sendCommand(ON)
-                }
             }
             else if (sCmdType.contains("OFF"))
-            {
-//                logInfo("OFF_PROCESSOR2",itSW.toString)
-                sendCommand(itSW,OFF)
-            }
-            else if (sCmdType.contains("ON")){
-//                logInfo("ON_PROCESSOR",itSW.toString)
+                sendCommand(itSW, OFF)
+            else if (sCmdType.contains("ON"))
                 itSW.sendCommand(ON)
-            }
-            else if (sCmdType.contains("DOWN")){
-//                logInfo("DOWN_PROCESSOR",itSW.toString)
+            else if (sCmdType.contains("DOWN"))
                 itSW.sendCommand(DOWN)
-            }
-            else if (sCmdType.contains("UP")){
-//                logInfo("DOWN_PROCESSOR",itSW.toString)
+            else if (sCmdType.contains("UP"))
                 itSW.sendCommand(UP)
-            }
-            else if (sCmdType.contains("STOP")){
-//                logInfo("DOWN_PROCESSOR",itSW.toString)
+            else if (sCmdType.contains("STOP"))
                 itSW.sendCommand(STOP)
-            }
-            
             else
-            {
-                 logInfo("ERROR in config Items",sArray.get(0))
-               
-            }
+                logWarn("RULE_EXEC_CONTACT", "Config error " + sCmdType)
+
+            return true
         } 
 
-         val itDimm = gAO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
-        
-        if (itDimm != null){
-
-//            logInfo("SW_NAME",itDimm.name)
-//            logInfo("SW_STATE",itDimm.state.toString)
-//            logInfo("SW_PREV_STATE",previousState(itDimm, true, "jdbc").state.toString)
-
-//            val  prevState =  previousState(itDimm, true, "jdbc").state as DecimalType
-            val  brightState=itDimm.state as DecimalType
-                
-            var prevVal = mapDimmerState.get(itDimm.name) //prevState.toBigDecimal.toBigInteger.intValue
-            var bright = brightState.toBigDecimal.toBigInteger.intValue
-
-            mapDimmerState.replace(itDimm.name,bright)
-
-            if (sCmdType.contains("CHANGE_BRIGHT")){
-//                logInfo("CHANGE_BRIGHT",itDimm.toString)
-
-                if(bright ==100){
-                    bright = 75
-                }
-                else if (bright == 0){
-                    bright = 25
-                }                
-                else if (bright >prevVal) {
-                    bright = bright + 25
-                    if (bright > 100)
-                        bright = 100
-                }
-                else {
-                    bright = bright -25
-                    if(bright < 0)
-                         bright = 0
-                }
-                 itDimm.sendCommand(bright) 
-                    
+        val itDimm = gAO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
+        if (itDimm != null)
+        {
+            var currentBright = 0
+            if(itDimm.state instanceof PercentType)
+            {
+                var currentState = itDimm.state as PercentType
+                currentBright = currentState.intValue
             }
-            else if (sCmdType.contains("Toggle")){
-//                logInfo("TOGGLE",itDimm.toString)
 
-                if (bright > 0){
-                    bright = 0
+            var prevVal = mapDimmerState.get(itDimm.name)
+            if(prevVal == null)
+            {
+                logWarn("RULE_EXEC_CONTACT", "Prev value is undef")
+            //         prevVal = PercentType.ZERO.intValue
+            }
+
+            mapDimmerState.replace(itDimm.name, currentBright)
+
+            if (sCmdType.contains("CHANGE_BRIGHT"))
+            {
+                //logInfo("RULE_EXEC_CONTACT", "Change bright command executing")
+                if(currentBright ==100)
+                    currentBright = 75
+                else if (currentBright == 0)
+                    currentBright = 25
+                else if (currentBright >prevVal) 
+                {
+                    currentBright = currentBright + 25
+                    if (currentBright > 100)
+                        currentBright = 100
                 }
-                else{
-                    if (prevVal == 0){
-                        bright = 25
-                    }
-                    else{
-                        bright = prevVal
-                    }
-                    
+                else 
+                {
+                    currentBright = currentBright - 25
+                    if(currentBright < 0)
+                        currentBright = 0
                 }
-                itDimm.sendCommand(bright)
+
+                itDimm.sendCommand(currentBright) 
+            }
+
+            else if (sCmdType.contains("Toggle"))
+            {
+                //logInfo("RULE_EXEC_CONTACT", "Toggle command executing")
+
+                if (currentBright > 0)
+                    currentBright = 0
+                else
+                {
+                    if (prevVal == 0)
+                        currentBright = 25
+                    else
+                        currentBright = prevVal
+                }
+
+                itDimm.sendCommand(currentBright)
             }
         }
-    
 end
+
 
 rule "Termostat Balkon"
         when 
@@ -301,6 +281,7 @@ rule "Termostat Balkon"
                 }
 end
 
+
 rule "Termostat Balkone change mode"
 when
     Item Temp_Balkon_Mode received update
@@ -311,9 +292,8 @@ then
     else if((Temp_Balkon_Mode.state as DecimalType).intValue == 1  ) {
         sendCommand(TPol_Office, ON)   
     } 
-    
-    
 end
+
 
 rule "RGB Set random color"
 	when
@@ -326,6 +306,7 @@ rule "RGB Set random color"
         }
 end
 
+
 rule "Bath Color"
 when
     Item Light_Bath_Color received update
@@ -334,10 +315,9 @@ then
         sendCommand(Light_Bath_RGB_Red, 0)
         sendCommand(Light_Bath_RGB_Green, 0)
         sendCommand(Light_Bath_RGB_Blue, 0)
-        
     } 
-       
 end
+
 
 rule "Toilet Cooler"
 when
@@ -364,16 +344,16 @@ then
 end
 
 
-
 rule "Bath Cooler ON"
 when
     Item gBathLights changed from OFF to ON
 then
-    // create a timer to turn the cooler on in 7 minutes
+    // create a timer to turn the cooler on in 10 minutes
     mdTimerBathCooler = createTimer(now.plusMinutes(10)) [|
         sendCommand(Light_Bath_Cooler, ON)
     ]
 end
+
 
 rule "Sensor Servernaya"
 when
