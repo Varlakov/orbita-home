@@ -12,7 +12,7 @@ Group gTChart_Bath // гафик температуры ванной
 Group gTemperature
 Group gLED
 
-Group:Switch:OR(ON, OFF) gLiving     "Гостинная [(%d)]"   <video>
+Group:Switch:OR(ON, OFF) gLiving     "Зал [(%d)]"   <video>
 Group:Switch:OR(ON, OFF) gKitchen    "Кухня [(%d)]"       <kitchen>
 Group:Switch:OR(ON, OFF) gToilet     "Туалет [(%d)]"      <toilet>
 Group:Switch:OR(ON, OFF) gCorridor   "Коридор [(%d)]"     <corridor>
@@ -27,7 +27,7 @@ Group gGarderob   "Гардеробная" <garderob>
 Group:Switch:OR(ON, OFF) gChildLights "Свет в Детской [(%d)]" (gDO)
 Group:Switch:OR(ON, OFF) gBedLights  "Свет в Спальне [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gCorridorLights  "Свет в Коридоре [(%d)]"  (gDO)
-Group:Switch:OR(ON, OFF) gLivingLights  "Свет в Гостинной [(%d)]"  (gDO)
+Group:Switch:OR(ON, OFF) gLivingLights  "Свет в Зале [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gBathLights  "Свет в Ванной [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gKitchenLights  "Свет на Кухне [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gToiletLights  "Свет в Туалете [(%d)]"  (gDO)
@@ -42,6 +42,21 @@ String CommandString    "Item that recieved command from RS485 Python" // Contac
 //String Contact_28_12     "Contact_Child_Table" (gVirtContact) ["Click:Light_Child_Table:Toggle", "DblClick:Light_Child_Ceiling:Toggle","LongPress:gChildLights:OFF"]
 
 // itemtype itemname "labeltext [stateformat]" <iconname> (group1, group2, ...) ["tag1", "tag2", ...] {bindingconfig}
+
+
+// ---------------- КОРИДОР  -------------------------------------
+
+String Contact_5_9      "Contact_Corridor_Ceiling" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:Lights:OFF"]
+String Contact_4_13     "Contact_Corridor_Ceiling2" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Garderob_Ceiling:Toggle","LongPress:Lights:OFF"]
+
+String Contact_4_12     "Contact_Corridor_Spot" (gVirtContact)   ["SClick:Light_Corridor_Spot:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
+
+Switch Light_Corridor_Ceiling   "Люстра"        (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:5"}
+Switch Light_Corridor_Spot      "Точечный"      (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:6"}
+Switch Light_Corridor_Bra       "Бра"           (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:4"}
+Switch Light_Garderob_Ceiling   "Свет в гардеробе"              (gDO, Lights, gGarderob, gCorridor)     ["Lighting"] {modbus="slave28:11"}
+// Switch Light_Corridor_Led    "Лента"         ( Lights, gCorridor)
+
 
 // -------------  ДЕТСКАЯ -------------------------
 
@@ -118,19 +133,6 @@ Switch Light_Toilet_Spot	"Точечный"	(gDO, Lights, gToilet, gToiletLights
 Switch Light_Toilet_Cooler	"Вентилятор"	(gDO, Cooler, gToilet)  ["Switchable"] {modbus="slave26:8"}
 Dimmer Light_Toilet_Led	"Лента"  	   (gAO, gLED, Lights, gToilet, gToiletLights)	["Lighting"] {modbus="[slave77:2:transformation=JS(mlt255.js)]"}
 
-
-// ---------------- КОРИДОР  -------------------------------------
-
-String Contact_5_9      "Contact_Corridor_Ceiling" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:Lights:OFF"]
-String Contact_4_13     "Contact_Corridor_Ceiling2" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Garderob_Ceiling:Toggle","LongPress:Lights:OFF"]
-
-String Contact_4_12     "Contact_Corridor_Spot" (gVirtContact)   ["SClick:Light_Corridor_Spot:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
-
-Switch Light_Corridor_Ceiling	"Люстра"	(gDO, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="slave26:5"}
-Switch Light_Corridor_Spot	"Точечный"	(gDO, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="slave26:6"}
-Switch Light_Corridor_Bra	"Бра"  		(gDO, Lights, gCorridor, gCorridorLights)  	["Lighting"] {modbus="slave26:4"}
-Switch Light_Garderob_Ceiling	"Свет в гардеробе"		(gDO, Lights, gGarderob, gCorridor)	["Lighting"] {modbus="slave28:11"}
-// Switch Light_Corridor_Led	"Лента"   	( Lights, gCorridor)
 
 // ----------------- ВАННАЯ -----------------------------------
 
@@ -260,3 +262,13 @@ Number Temp_Bath_SetMinute7 "Минуты  7"   (gSetpointBath)
 Number Temp_Bath_SetMinute8 "Минуты  8"   (gSetpointBath)
 Number Temp_Bath_SetMinute9 "Минуты  9"   (gSetpointBath)
 Number Temp_Bath_SetMinute10 "Минуты  10"   (gSetpointBath)
+
+
+
+// -----------     Astro   ----
+DateTime Sunrise_Time	"Восход [%1$tH:%1$tM]"    (gBed)  {channel = "astro:sun:home:rise#start"}
+DateTime Sunset_Time    "Закат  [%1$tH:%1$tM]"    (gBed)  {channel = "astro:sun:home:set#start"}
+
+DateTime DayLightStart_Time	"Рассвет [%1$tH:%1$tM]"   (gBed) { channel="astro:sun:home:daylight#start" }
+DateTime DayLigtEnd_Time	"Сумерки [%1$tH:%1$tM]" (gBed) {channel = "astro:sun:home:daylight#end"}
+// -------

@@ -1,4 +1,5 @@
 import java.util.Random
+import org.eclipse.smarthome.core.library.types.*
 import org.openhab.core.library.types.*
 import org.openhab.model.script.actions.*
 import org.openhab.core.items.*
@@ -53,58 +54,7 @@ rule "Init LED dimmer state"
 end
 
 
-/*
-rule "Light_FF_Child_Ceiling State"
-        when
-                Item Light_FF_Child_Ceiling received update
-        then
-                if (Light_FF_Child_Ceiling.state == ON) {
-
-                        var State = OutputsState.state as DecimalType
-                        var Pos   = State.toBigDecimal.toBigInteger.intValue.bitwiseOr(1)
-                        postUpdate(OutputsState,Pos)
-
-                } else {
-                         var State = OutputsState.state as DecimalType
-                         var Pos   = State.toBigDecimal.toBigInteger.intValue.bitwiseAnd(-2)
-                          postUpdate(OutputsState,Pos)
-                         }
-
-end
-		
-rule "Contact_0_1"
-        when
-                Item Contact_0_1 received update
-        then
-                if(Contact_0_1.state == "LPress")
-                        sendCommand(Lights, OFF)
-		if(Contact_0_1.state == "Click")
-                        sendCommand(Light_FF_Child_Ceiling, OFF)
-		if(Contact_0_1.state == "DblClick")
-                        sendCommand(Lights, OFF)
-end
-
-
-rule "Light_FF_Office_Ceiling State"
-        when
-                Item Light_FF_Office_Ceiling received update
-        then
-                if (Light_FF_Office_Ceiling.state == ON) {
-                    var State = OutputsState.state as DecimalType
-                    var Pos   = State.toBigDecimal.toBigInteger.intValue.bitwiseOr(4)
-                    postUpdate(OutputsState,Pos)
-
-                } else 
-                {
-                    var State = OutputsState.state as DecimalType
-                    var Pos   = State.toBigDecimal.toBigInteger.intValue.bitwiseAnd(-5)
-                    postUpdate(OutputsState,Pos)
-                }
-
-end
-*/
-
-rule "Contact_0_1"
+rule "Shutter BedRoom"
         when
             Item Shutter_Bed received command
         then
@@ -379,3 +329,26 @@ then
 	}
 
 end
+
+
+rule "Close curtain in the Evening"
+when
+	Item gBedLights changed from OFF to ON
+then
+	if( Shutter_Bed.state != 100){
+		if(now.isAfter((DayLigtEnd_Time.state as DateTimeType).calendar.timeInMillis)){
+			Shutter_Bed.sendCommand(DOWN)
+		}
+	}
+end
+
+
+rule "Open curtain in bedroom in the Morning 9-00"
+        when
+                Time cron "0 0 9 * * ?"
+        then
+
+	Shutter_Bed.sendCommand(UP)
+
+end
+

@@ -9,7 +9,7 @@ sitemap olga label="Main Menu"
 		Switch item=gCorridorLights mappings=[OFF="Выкл всё"]  icon="corridor"
 	}
 	Frame {
-		Group item=gLiving label="Гостинная" icon="screen"
+		Group item=gLiving label="Зал" icon="screen"
 		Group item=gKitchen label="Кухня" icon="kitchen"
 		Group item=gBed label="Спальня" icon="bedroom"
 		Group item=gChild label="Детская" icon="boy_1"
@@ -22,8 +22,10 @@ sitemap olga label="Main Menu"
 		Group item=gBalkony label="Лоджия" icon="garage"
 
 		Text label="Термостаты" icon="line" {
-			Text item=Weather_Temperature
-			Text item=Weather_Humidity
+			Frame label="Погода"{
+				Text item=Weather_Temperature
+				Text item=Weather_Humidity
+			}
 			Frame label="Балкон" {
 				Setpoint item=Temp_Balkon_SetPoint minValue=0 maxValue=35 step=0.5
 				Text item=Temp_Balkon
