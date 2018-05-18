@@ -3,7 +3,6 @@ import org.eclipse.smarthome.core.library.types.*
 import org.openhab.core.library.types.*
 import org.openhab.model.script.actions.*
 import org.openhab.core.items.*
-import org.openhab.core.items.GenericItem
 import org.eclipse.smarthome.core.persistence.*
 import java.lang.String
 import java.util.List 
@@ -22,23 +21,6 @@ val Map<String, Integer> mapDimmerState = new HashMap<String, Integer>()
 var Timer mdTimerServernaya = null
 var Timer mdTimerBathCooler = null
 
-/**
- * This is a demo rule which simulates a real dimmer by reacting to increase/decrease commands
- * and posting an updated state on the bus
- */
-/*
-rule "Set random room temperatures"
-	when
-		System started or
-		Time cron "0/1 * * * * ?"
-	then
-		Temperature?.members.forEach(temperature|
-			postUpdate(temperature, 20.0 + (25.0 - (Math::random * 50.0).intValue) / 10.0)
-		)
-
-
-end
-*/
 rule "Init LED dimmer state"
 	when
 		System started
@@ -94,25 +76,27 @@ rule "Execute Contact"
         //logInfo("RULE_EXEC_CONTACT", sCommand)
 
         var List<String> sArray = sCommand.split(":")
-        var slectedItem = gVirtContact.members.filter(mem | mem.name == sArray.get(0)).head as GenericItem
-        if(slectedItem == null)
+        var filter0 = sArray.get(0);
+        var slectedItem = gVirtContact.members.filter(mem | mem.name == filter0).head as GenericItem
+        if(slectedItem === null)
         {
             //logWarn("RULE_EXEC_CONTACT", "No item " + sArray.get(0))
-            return false
+            return
         }
 
-        var cmdTag = slectedItem.tags.filter(tg | tg.contains(sArray.get(1))).head as String
-        if (cmdTag == null || cmdTag.isEmpty())
+        var filter1 = sArray.get(1);
+        var cmdTag = slectedItem.tags.filter(tg | tg.contains(filter1)).head
+        if (cmdTag === null || cmdTag.isEmpty())
         {
             //logWarn("RULE_EXEC_CONTACT", "No tag " + sArray.get(1))
-            return false
+            return
         }
 
         var List<String> tagArray = cmdTag.split(":")
         if(tagArray.length < 3)
         {
             //logWarn("RULE_EXEC_CONTACT", "Configuration error " + cmdTag)
-            return false
+            return
         }
 
         //logInfo("RULE_EXEC_CONTACT", "Tag " + cmdTag)
@@ -121,7 +105,7 @@ rule "Execute Contact"
 
         // сначала ищем item среди выключателей освещения (цифровые выходы)
         val itSW = gDO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
-        if (itSW != null)
+        if (itSW !== null)
         {
             if(sCmdType.contains("Toggle"))
             {
@@ -143,11 +127,11 @@ rule "Execute Contact"
             else
                 logWarn("RULE_EXEC_CONTACT", "Config error " + sCmdType)
 
-            return true
+            return
         } 
 
         val itDimm = gAO.members.filter(mem | mem.name == tagArray.get(1)).head as GenericItem
-        if (itDimm != null)
+        if (itDimm !== null)
         {
             var currentBright = 0
             if(itDimm.state instanceof PercentType)
@@ -317,14 +301,14 @@ then
 	}
 	else
 	{
-		if (mdTimerServernaya == null) {
-			mdTimerServernaya  = createTimer(now.plusMinutes(1 ), [|
+		if (mdTimerServernaya === null) {
+			mdTimerServernaya  = createTimer(now.plusMinutes(1), [|
 			Light_Servernaya_Ceiling.sendCommand(OFF)
 			mdTimerServernaya  = null
 			])
 		}
 		else{
-	 		mdTimerServernaya.reschedule(now.plusMinutes(1 ))
+	 		mdTimerServernaya.reschedule(now.plusMinutes(1))
 		}
 	}
 
@@ -352,3 +336,24 @@ rule "Open curtain in bedroom in the Morning 9-00"
 
 end
 
+rule "Shutter Livingroom"
+        when
+            Item Shutter_Living received command
+        then
+            
+            if(receivedCommand == UP){
+//                logInfo("SHUTTER_UP",Shutter_Bed.state.toString())
+                sendCommand(Shutter_Living_Up,ON)
+                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Up, OFF) ]
+            }
+		    else if(receivedCommand == DOWN){
+ //               logInfo("SHUTTER_DOWN",Shutter_Bed.state.toString())
+                sendCommand(Shutter_Living_Down,ON)
+                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Down, OFF) ]
+            }
+		    else if(receivedCommand == STOP){
+ //               logInfo("SHUTTER_STOP",Shutter_Bed.state.toString())
+                sendCommand(Shutter_Living_Stop,ON)
+                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Stop, OFF) ]
+            }
+end
