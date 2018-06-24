@@ -253,18 +253,6 @@ then
 end
 
 
-rule "Toilet Cooler"
-when
-    Item gToiletLights changed from ON to OFF
-then
-    sendCommand(Light_Toilet_Cooler,ON)
-    // create a timer to turn the cooler off
-    timer = createTimer(now.plusSeconds(300)) [|
-        sendCommand(Light_Toilet_Cooler, OFF)
-    ]
-end
-
-
 rule "Bath Cooler OFF"
 when
     Item gBathLights changed from ON to OFF

@@ -1,0 +1,59 @@
+var Timer toiletCoolerTimer = null
+var Timer toiletLightTimer = null
+
+val LocalTime morning = new LocalTime(4, 0)
+val LocalTime evening = new LocalTime(22, 0)
+val LocalTime dayStart = new LocalTime(0, 0)
+val int maxLightVal = 50
+val int lightPulsMinutes = 1
+val int coolerPulsMinutes = 2
+
+rule "Toilet Cooler"
+when
+    Item gToiletLights changed from ON to OFF
+then
+    sendCommand(Light_Toilet_Cooler, ON)
+    // create a timer to turn the cooler off
+    toiletCoolerTimer = createTimer(now.plusMinutes(coolerPulsMinutes)) [|
+        sendCommand(Light_Toilet_Cooler, OFF)
+    ]
+end
+
+
+rule "Sensor toilet"
+when
+	Item Sensor_Toilet received update
+then
+
+    val LocalTime current = now.toLocalTime()
+
+	if(Sensor_Toilet.state == CLOSED)
+	{
+        if(gToiletLights.state == OFF)
+        {
+            if((current.isAfter(evening) && current.isBefore(dayStart.plusMillis(-1))) ||
+               (current.isAfter(dayStart) && current.isBefore(morning)))
+            {
+                Light_Toilet_Led.sendCommand(maxLightVal)
+            }
+            else
+            {
+                Light_Toilet_Spot.sendCommand(ON)
+            }
+        }
+	}
+	else
+	{
+        if (toiletLightTimer === null) 
+        {
+            toiletLightTimer  = createTimer(now.plusMinutes(lightPulsMinutes), [|
+                gToiletLights.sendCommand(OFF)
+                toiletLightTimer = null
+            ])
+        }
+        else
+        {
+            toiletLightTimer.reschedule(now.plusMinutes(lightPulsMinutes))
+        }
+	}
+end

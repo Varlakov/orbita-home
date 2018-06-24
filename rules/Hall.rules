@@ -1,40 +1,28 @@
-//import java.util.Random
-//import org.eclipse.smarthome.core.library.types.*
-//import org.openhab.core.library.types.*
-//import org.openhab.model.script.actions.*
-//import org.openhab.core.items.*
-//import org.eclipse.smarthome.core.persistence.*
-//import java.lang.String
-//import java.util.List 
-//import java.lang.Integer
-//import java.util.Map
-//import java.util.HashMap
-//import java.util.concurrent.locks.ReentrantLock
-
 val LocalTime morning = new LocalTime(4, 0)
 val LocalTime evening = new LocalTime(22, 0)
 val LocalTime dayStart = new LocalTime(0, 0)
+val int maxLightVal = 30
+val int pulsMinutes = 1
 
 var Timer mdTimerHall2 = null
+var Timer mdTimerHall1 = null
 
 
-rule "Sensor hall"
+rule "Sensor hall 2"
 when
-	Item Sensor_Corridor_1 received update
+	Item Sensor_Corridor_2 received update
 then
 
     val LocalTime current = now.toLocalTime()
 
-    logInfo("SENSOR_CORRIDOR_1", Light_Corridor_RGB_Green.state.toString())
-
-	if(Sensor_Corridor_1.state == CLOSED)
+	if(Sensor_Corridor_2.state == CLOSED)
 	{
         if((current.isAfter(evening) && current.isBefore(dayStart.plusMillis(-1))) ||
            (current.isAfter(dayStart) && current.isBefore(morning)))
         {
-            if(Light_Corridor_RGB_Green.state == 0)
+            if(Light_Corridor_RGB_Green.state == NULL || Light_Corridor_RGB_Green.state == 0)
             {
-		        Light_Corridor_RGB_Green.sendCommand(15)
+		        Light_Corridor_RGB_Green.sendCommand(maxLightVal)
             }
         }
 	}
@@ -44,15 +32,58 @@ then
         {
             if (mdTimerHall2 === null) 
             {
-                mdTimerHall2  = createTimer(now.plusMinutes(1), [|
+                mdTimerHall2  = createTimer(now.plusMinutes(pulsMinutes), [|
                     Light_Corridor_RGB_Green.sendCommand(0)
                     mdTimerHall2  = null
                 ])
             }
             else
             {
-                mdTimerHall2.reschedule(now.plusMinutes(1))
+                mdTimerHall2.reschedule(now.plusMinutes(pulsMinutes))
             }
         }
 	}
 end
+
+
+rule "Sensor hall 1"
+when
+	Item Sensor_Corridor_1 received update
+then
+
+    val LocalTime current = now.toLocalTime()
+
+	if(Sensor_Corridor_1.state == CLOSED)
+	{
+        if((current.isAfter(evening) && current.isBefore(dayStart.plusMillis(-1))) ||
+           (current.isAfter(dayStart) && current.isBefore(morning)))
+        {
+            if(Light_Corridor_RGB_Red.state == NULL || Light_Corridor_RGB_Red.state == 0)
+            {
+		        Light_Corridor_RGB_Red.sendCommand(maxLightVal)
+            }
+        }
+	}
+	else
+	{
+        if(Light_Corridor_RGB_Red.state > 0)
+        {
+            if (mdTimerHall1 === null) 
+            {
+                mdTimerHall1  = createTimer(now.plusMinutes(pulsMinutes), [|
+                    Light_Corridor_RGB_Red.sendCommand(0)
+                    mdTimerHall1  = null
+                ])
+            }
+            else
+            {
+                mdTimerHall1.reschedule(now.plusMinutes(pulsMinutes))
+            }
+        }
+	}
+end
+
+// TODO: Включать, если больше ничего не включено; 
+//       выключать, если включаются лампы; 
+//       использовать восход-заход; 
+//       использовать освещённость
