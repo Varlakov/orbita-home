@@ -1,0 +1,32 @@
+Switch DenonPower		    "Power"			    {denon="avrX1400#PW"}
+Switch DenonMainZone		"Main Zone"		    {denon="avrX1400#ZM"}
+Dimmer DenonVolume		    "Volume [%.1f]"		{denon="avrX1400#MV"}
+Switch DenonMute		    "Mute"			    {denon="avrX1400#MU"}
+//String DenonSurroundMode	"Surround mode [%s]"	{denon="avrX1400#SURROUNDMODE"}
+//String DenonCommand		    "Command"		    {denon="avrX1400#COMMAND", autoupdate=false}
+
+//String DenonCurrentTrack	"Current track [%s]"	{denon="avrX1400#TRACK"}
+//String DenonCurrentArtist	"Current artist [%s]"	{denon="avrX1400#ARTIST"}
+//String DenonCurrentAlbum	"Current album [%s]"	{denon="avrX1400#ALBUM"}
+
+//String DenonInput		    "Input [%s]"		{denon="avrX1400#INPUT"}
+//Switch DenonInputCD		    "Input CD"		    {denon="avrX1400#SICD"}
+//Switch DenonInputUSBIPOD	"Input USB/IPOD"	{denon="avrX1400#SIUSB/IPOD"}
+//Switch DenonInputNet		"Input Network"		{denon="avrX1400#SINET"}
+//Switch DenonInputSpotify	"Input Spotify"		{denon="avrX1400#SISPOTIFY"}
+//Switch DenonInputTuner		"Input Tuner"		{denon="avrX1400#SITUNER"}
+//Switch DenonInputDVD		"Input DVD"		    {denon="avrX1400#SIDVD"}
+//Switch DenonInputBluray		"Input Bluray"		{denon="avrX1400#SIBD"}
+//Switch DenonInputTV		    "Input TV"		    {denon="avrX1400#SITV"}
+//Switch DenonInputSATCBL		"Input SAT/CBL"		{denon="avrX1400#SISAT/CBL"}
+//Switch DenonInputMplay		"Input Mediaplayer"	{denon="avrX1400#SIMPLAY"}
+//Switch DenonInputGame		"Input Game"		{denon="avrX1400#SIGAME"}
+//Switch DenonInputAux1		"Input Aux1"		{denon="avrX1400#SIAUX1"}
+
+Switch DenonZoneTwo		    "Zone 2"		    {denon="avrX1400#Z2"}
+Dimmer DenonZoneTwoVolume	"Volume [%.1f]"		{denon="avrX1400#Z2ZV"}
+Switch DenonZoneTwoMute		"Zone 2 Mute"		{denon="avrX1400#Z2MU"}
+
+//Switch DenonZoneTwoInputSource	"Zone 2 Input Source"	{denon="avrX1400#Z2SOURCE"}
+//Switch DenonZoneTwoInputUSB	    "Zone 2 Input USB"	    {denon="avrX1400#Z2USB/IPOD"}
+//Switch DenonZoneTwoInputTuner	"Zone 2 Tuner"		    {denon="avrX1400#Z2TUNER"}

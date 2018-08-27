@@ -80,7 +80,22 @@ sitemap olga label="Main Menu"
 			}
 		}
 	}
-	
+
+
+		Frame label="Main Zone" {
+			Switch item=DenonPower
+			Switch item=DenonMainZone
+			Slider item=DenonVolume
+			//Setpoint item=DenonVolume minValue=0 maxValue=100 step=0.5
+			Switch item=DenonMute
+			//Switch item=DenonCommand label="Surround Mode" mappings=[MSSTANDARD="Standard", MSSTEREO="Stereo"]
+		}
+
+		Frame label="Zone 2" {
+			Switch item=DenonZoneTwo
+			Switch item=DenonZoneTwoMute
+			Slider item=DenonZoneTwoVolume
+		}
 }
 
 // vim: syntax=Xtend
