@@ -44,20 +44,25 @@ String CommandString    "Item that recieved command from RS485 Python" // Contac
 // --- КОРИДОР  -------------------------------------
 
 String Contact_5_9      "Contact_Corridor_Ceiling" (gVirtContact)   ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Corridor_Spot:Toggle","LongPress:Lights:OFF"]
-String Contact_4_13     "Contact_Corridor_Ceiling2" (gVirtContact)  ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Garderob_Ceiling:Toggle","LongPress:Lights:OFF"]
+String Contact_4_13     "Contact_Corridor_Ceiling2" (gVirtContact)  ["SClick:Light_Corridor_Ceiling:Toggle", "DblClick:Light_Corridor_Bra:Toggle","LongPress:Lights:OFF"]
 String Contact_4_10     "Contact_Corridor_Spot" (gVirtContact)      ["SClick:Light_Corridor_Spot:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
 String Contact_4_11     "Contact_Corridor_Bra" (gVirtContact)       ["SClick:Light_Corridor_Bra:Toggle", "DblClick:Light_Bed_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
 
 Switch Light_Corridor_Ceiling   "Люстра"        (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:5"}
 Switch Light_Corridor_Spot      "Точечный"      (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:6"}
 Switch Light_Corridor_Bra       "Бра"           (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:4"}
-Switch Light_Garderob_Ceiling   "Свет в гардеробе"              (gDO, Lights, gGarderob, gCorridor)     ["Lighting"] {modbus="slave28:11"}
 
 Dimmer Light_Corridor_RGB_Red		"Лента 1"   	   (gAO, gLED, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="[slave88:1:transformation=JS(mlt255.js)]"}
 Dimmer Light_Corridor_RGB_Green		"Лента 2"   	   (gAO, gLED, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="[slave88:0:transformation=JS(mlt255.js)]"}
 
 Contact Sensor_Corridor_1 (gCorridor) {modbus="<[slaveDI26:0]"}
 Contact Sensor_Corridor_2 (gCorridor) {modbus="<[slaveDI26:2]"}
+
+
+// --- ГАРДЕРОБ  -------------------------------------
+
+Switch Light_Garderob_Ceiling   "Свет в гардеробе"              (gDO, Lights, gGarderob, gCorridor)     ["Lighting"] {modbus="slave28:11"}
+Contact Sensor_Garderob (gGarderob) {modbus="<[slaveDI26:3]"}
 
 
 // ---  ДЕТСКАЯ --------------------------------
