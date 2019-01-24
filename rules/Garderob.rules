@@ -1,0 +1,24 @@
+var Timer mdTimerGarderob = null
+
+rule "Sensor Garderob"
+when
+	Item Sensor_Garderob received update
+then
+	
+	if(Sensor_Garderob.state == CLOSED)
+	{
+        Light_Garderob_Ceiling.sendCommand(ON)
+	}
+	else
+	{
+		if (mdTimerGarderob === null) {
+			mdTimerGarderob  = createTimer(now.plusMinutes(1), [|
+		    	Light_Garderob_Ceiling.sendCommand(OFF)
+			    mdTimerGarderob  = null
+			])
+		}
+		else{
+	 		mdTimerGarderob.reschedule(now.plusMinutes(1))
+		}
+	}
+end

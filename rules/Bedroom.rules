@@ -1,0 +1,43 @@
+rule "Shutter BedRoom"
+    when
+        Item Shutter_Bed received command
+    then
+            
+            if(receivedCommand == UP){
+//                logInfo("SHUTTER_UP",Shutter_Bed.state.toString())
+                sendCommand(Shutter_Bed_Up,ON)
+                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Up, OFF) ]
+            }
+		    else if(receivedCommand == DOWN){
+ //               logInfo("SHUTTER_DOWN",Shutter_Bed.state.toString())
+                sendCommand(Shutter_Bed_Down,ON)
+                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Down, OFF) ]
+            }
+		    else if(receivedCommand == STOP){
+ //               logInfo("SHUTTER_STOP",Shutter_Bed.state.toString())
+                sendCommand(Shutter_Bed_Stop,ON)
+                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Stop, OFF) ]
+            }
+end
+
+
+rule "Close curtain in the Evening"
+when
+	Item gBedLights changed from OFF to ON
+then
+	if( Shutter_Bed.state != 100){
+		if(now.isAfter((DayLigtEnd_Time.state as DateTimeType).calendar.timeInMillis)){
+			Shutter_Bed.sendCommand(DOWN)
+		}
+	}
+end
+
+
+rule "Open curtain in bedroom in the Morning 9-00"
+        when
+                Time cron "0 0 9 * * ?"
+        then
+
+	Shutter_Bed.sendCommand(UP)
+
+end

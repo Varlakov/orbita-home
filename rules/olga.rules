@@ -36,29 +36,6 @@ rule "Init LED dimmer state"
 end
 
 
-rule "Shutter BedRoom"
-        when
-            Item Shutter_Bed received command
-        then
-            
-            if(receivedCommand == UP){
-//                logInfo("SHUTTER_UP",Shutter_Bed.state.toString())
-                sendCommand(Shutter_Bed_Up,ON)
-                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Up, OFF) ]
-            }
-		    else if(receivedCommand == DOWN){
- //               logInfo("SHUTTER_DOWN",Shutter_Bed.state.toString())
-                sendCommand(Shutter_Bed_Down,ON)
-                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Down, OFF) ]
-            }
-		    else if(receivedCommand == STOP){
- //               logInfo("SHUTTER_STOP",Shutter_Bed.state.toString())
-                sendCommand(Shutter_Bed_Stop,ON)
-                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Bed_Stop, OFF) ]
-            }
-end
-
-
 rule "Execute Contact"
     when
         Item CommandString received update
@@ -152,11 +129,11 @@ rule "Execute Contact"
             if (sCmdType.contains("CHANGE_BRIGHT"))
             {
                 //logInfo("RULE_EXEC_CONTACT", "Change bright command executing")
-                if(currentBright ==100)
+                if(currentBright == 100)
                     currentBright = 75
                 else if (currentBright == 0)
-                    currentBright = 25
-                else if (currentBright >prevVal) 
+                    currentBright = 100
+                else if (currentBright > prevVal) 
                 {
                     currentBright = currentBright + 25
                     if (currentBright > 100)
@@ -303,45 +280,41 @@ then
 end
 
 
-rule "Close curtain in the Evening"
-when
-	Item gBedLights changed from OFF to ON
-then
-	if( Shutter_Bed.state != 100){
-		if(now.isAfter((DayLigtEnd_Time.state as DateTimeType).calendar.timeInMillis)){
-			Shutter_Bed.sendCommand(DOWN)
-		}
-	}
-end
 
 
-rule "Open curtain in bedroom in the Morning 9-00"
-        when
-                Time cron "0 0 9 * * ?"
-        then
-
-	Shutter_Bed.sendCommand(UP)
-
-end
 
 rule "Shutter Livingroom"
-        when
-            Item Shutter_Living received command
-        then
-            
-            if(receivedCommand == UP){
-//                logInfo("SHUTTER_UP",Shutter_Bed.state.toString())
-                sendCommand(Shutter_Living_Up,ON)
-                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Up, OFF) ]
-            }
-		    else if(receivedCommand == DOWN){
- //               logInfo("SHUTTER_DOWN",Shutter_Bed.state.toString())
-                sendCommand(Shutter_Living_Down,ON)
-                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Down, OFF) ]
-            }
-		    else if(receivedCommand == STOP){
- //               logInfo("SHUTTER_STOP",Shutter_Bed.state.toString())
-                sendCommand(Shutter_Living_Stop,ON)
-                createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Stop, OFF) ]
-            }
+    when
+        Item Shutter_Living received command
+    then
+        if(receivedCommand == UP){
+            sendCommand(Shutter_Living_Up,ON)
+            createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Up, OFF) ]
+        }
+		else if(receivedCommand == DOWN){
+            sendCommand(Shutter_Living_Down,ON)
+            createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Down, OFF) ]
+        }
+		else if(receivedCommand == STOP){
+            sendCommand(Shutter_Living_Stop,ON)
+            createTimer(now.plusMillis(300)) [| sendCommand(Shutter_Living_Stop, OFF) ]
+        }
+end
+
+rule "Open curtain in Livingroom at 7-30 AM"
+    when
+        Time cron "0 30 7 * * ?"
+    then
+        Shutter_Living.sendCommand(UP)
+end
+
+rule "Close living curtain in the Evening"
+when
+	Item gLivingLights changed from OFF to ON
+then
+	if(Shutter_Living.state != 100){
+		if(now.isAfter((DayLigtEnd_Time.state as DateTimeType).calendar.timeInMillis)){
+			Shutter_Living.sendCommand(DOWN)
+		}
+	}
 end
