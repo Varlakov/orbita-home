@@ -26,7 +26,7 @@ when
 	Item gBedLights changed from OFF to ON
 then
 	if( Shutter_Bed.state != 100){
-		if(now.isAfter((DayLigtEnd_Time.state as DateTimeType).calendar.timeInMillis)){
+		if(now.isAfter((Sunset_Time.state as DateTimeType).calendar.timeInMillis)){
 			Shutter_Bed.sendCommand(DOWN)
 		}
 	}

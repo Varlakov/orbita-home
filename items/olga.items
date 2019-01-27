@@ -31,6 +31,7 @@ Group:Switch:OR(ON, OFF) gLivingLights  "Свет в Зале [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gBathLights  "Свет в Ванной [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gKitchenLights  "Свет на Кухне [(%d)]"  (gDO)
 Group:Switch:OR(ON, OFF) gToiletLights  "Свет в Туалете [(%d)]"  (gDO)
+Group:Switch:OR(ON, OFF) gCorridorTopLights  "Свет в Коридоре (Верх) [(%d)]"  (gDO)
 
 
 Number OutputsState             "Outputs"  // Out26:2453|Out28:4534|Out5:6435|Dimm78R:255
@@ -48,9 +49,9 @@ String Contact_4_13     "Contact_Corridor_Ceiling2" (gVirtContact)  ["SClick:Lig
 String Contact_4_10     "Contact_Corridor_Spot" (gVirtContact)      ["SClick:Light_Corridor_Spot:Toggle", "DblClick:Light_Corridor_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
 String Contact_4_11     "Contact_Corridor_Bra" (gVirtContact)       ["SClick:Light_Corridor_Bra:Toggle", "DblClick:Light_Bed_Ceiling:Toggle","LongPress:gCorridorLights:OFF"]
 
-Switch Light_Corridor_Ceiling   "Люстра"        (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:5"}
-Switch Light_Corridor_Spot      "Точечный"      (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:6"}
-Switch Light_Corridor_Bra       "Бра"           (gDO, Lights, gCorridor, gCorridorLights)       ["Lighting"] {modbus="slave26:4"}
+Switch Light_Corridor_Ceiling   "Люстра"        (gDO, Lights, gCorridor, gCorridorLights, gCorridorTopLights)       ["Lighting"] {modbus="slave26:5"}
+Switch Light_Corridor_Spot      "Точечный"      (gDO, Lights, gCorridor, gCorridorLights, gCorridorTopLights)       ["Lighting"] {modbus="slave26:6"}
+Switch Light_Corridor_Bra       "Бра"           (gDO, Lights, gCorridor, gCorridorLights, gCorridorTopLights)       ["Lighting"] {modbus="slave26:4"}
 
 Dimmer Light_Corridor_RGB_Red		"Лента 1"   	   (gAO, gLED, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="[slave88:1:transformation=JS(mlt255.js)]"}
 Dimmer Light_Corridor_RGB_Green		"Лента 2"   	   (gAO, gLED, Lights, gCorridor, gCorridorLights)	["Lighting"] {modbus="[slave88:0:transformation=JS(mlt255.js)]"}
@@ -272,10 +273,10 @@ Number Temp_Bath_SetMinute10 "Минуты  10"   (gSetpointBath)
 
 
 
-// -----------     Astro   ----
-DateTime Sunrise_Time	"Восход [%1$tH:%1$tM]"    (gBed)  {channel = "astro:sun:home:rise#start"}
-DateTime Sunset_Time    "Закат  [%1$tH:%1$tM]"    (gBed)  {channel = "astro:sun:home:set#start"}
+// -----------     Astro   ----------   https://voshod-solnca.ru/минск.html
+DateTime Sunrise_Time	"Восход [%1$tH:%1$tM]" <sunrise>   (gExternal)  {channel = "astro:sun:home:rise#start"}
+DateTime Sunset_Time    "Закат  [%1$tH:%1$tM]" <sunset>    (gExternal)  {channel = "astro:sun:home:set#end"}
 
-DateTime DayLightStart_Time	"Рассвет [%1$tH:%1$tM]"   (gBed) { channel="astro:sun:home:daylight#start" }
-DateTime DayLigtEnd_Time	"Сумерки [%1$tH:%1$tM]" (gBed) {channel = "astro:sun:home:daylight#end"}
+//DateTime DayLightStart_Time	"Рассвет [%1$tH:%1$tM]" (gExternal) {channel = "astro:sun:home:daylight#start" }
+//DateTime DayLigtEnd_Time	"Сумерки [%1$tH:%1$tM]" (gExternal) {channel = "astro:sun:home:daylight#end"}
 // -------

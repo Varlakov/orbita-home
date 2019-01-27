@@ -25,6 +25,9 @@ sitemap olga label="Main Menu"
 			Frame label="Погода"{
 				Text item=Weather_Temperature
 				Text item=Weather_Humidity
+
+				Text item=Sunrise_Time
+				Text item=Sunset_Time
 			}
 			Frame label="Балкон" {
 				Setpoint item=Temp_Balkon_SetPoint minValue=0 maxValue=35 step=0.5

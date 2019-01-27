@@ -313,7 +313,7 @@ when
 	Item gLivingLights changed from OFF to ON
 then
 	if(Shutter_Living.state != 100){
-		if(now.isAfter((DayLigtEnd_Time.state as DateTimeType).calendar.timeInMillis)){
+		if(now.isAfter((Sunset_Time.state as DateTimeType).calendar.timeInMillis)){
 			Shutter_Living.sendCommand(DOWN)
 		}
 	}

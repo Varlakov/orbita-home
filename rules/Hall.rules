@@ -3,9 +3,30 @@ val LocalTime evening = new LocalTime(22, 0)
 val LocalTime dayStart = new LocalTime(0, 0)
 val int maxLightVal = 30
 val int pulsMinutes = 1
+val int pulsMinutesMax = 4
 
 var Timer mdTimerHall2 = null
 var Timer mdTimerHall1 = null
+
+
+rule "Hall top lights ON"
+when
+	Item gCorridorTopLights changed from OFF to ON
+then
+	if(mdTimerHall2 !== null)
+    {
+        mdTimerHall2.cancel()
+        Light_Corridor_RGB_Green.sendCommand(0)
+        mdTimerHall2  = null
+    }
+
+    if(mdTimerHall1 !== null)
+    {
+        mdTimerHall1.cancel()
+        Light_Corridor_RGB_Green.sendCommand(0)
+        mdTimerHall1  = null
+    }
+end
 
 
 rule "Sensor hall 2"
@@ -13,33 +34,61 @@ when
 	Item Sensor_Corridor_2 received update
 then
 
-    val LocalTime current = now.toLocalTime()
-
 	if(Sensor_Corridor_2.state == CLOSED)
 	{
-        if((current.isAfter(evening) && current.isBefore(dayStart.plusMillis(-1))) ||
-           (current.isAfter(dayStart) && current.isBefore(morning)))
+        val day_start = new DateTime(Sunrise_Time.state.toString) 
+        val evening_start = new DateTime(Sunset_Time.state.toString)
+
+        if(now.isAfter(day_start) && now.isBefore(evening_start))
         {
-            if(Light_Corridor_RGB_Green.state == NULL || Light_Corridor_RGB_Green.state == 0)
-            {
-		        Light_Corridor_RGB_Green.sendCommand(maxLightVal)
-            }
+            logInfo("HALL RULE", "SKIP: it is day time")
+            return
+        }
+
+        if(gCorridorTopLights.state == ON)
+        {
+            logInfo("HALL RULE", "SKIP: light is ON")
+            return
+        }
+        
+        if(Light_Corridor_RGB_Green.state == NULL || Light_Corridor_RGB_Green.state == 0)
+        {
+		    Light_Corridor_RGB_Green.sendCommand(maxLightVal)
         }
 	}
 	else
 	{
-        if(Light_Corridor_RGB_Green.state > 0)
+        if(Light_Corridor_RGB_Green != NULL && Light_Corridor_RGB_Green.state > 0)
         {
+            var interval = pulsMinutes;
+            val evening_start = new DateTime(Sunset_Time.state.toString)
+            val tenPM = now.withTimeAtStartOfDay().plusHours(22) //new DateTime(int year, int monthOfYear, int dayOfMonth, 22, 0)
+            if(now.isAfter(evening_start) && now.isBefore(tenPM))
+                interval = pulsMinutesMax
+
             if (mdTimerHall2 === null) 
             {
-                mdTimerHall2  = createTimer(now.plusMinutes(pulsMinutes), [|
+                //if(gCorridorTopLights.state == ON)
+                //{
+                //    logInfo("HALL RULE", "SKIP: light is ON timer is NULL")
+                //    Light_Corridor_RGB_Green.sendCommand(0)
+                //    return
+                //}
+
+                mdTimerHall2  = createTimer(now.plusMinutes(interval), [|
                     Light_Corridor_RGB_Green.sendCommand(0)
                     mdTimerHall2  = null
                 ])
             }
             else
             {
-                mdTimerHall2.reschedule(now.plusMinutes(pulsMinutes))
+                //if(gCorridorTopLights.state == ON)
+                //{
+                //    logInfo("HALL RULE", "SKIP: light is ON timer is NOT NULL")
+                //    return
+                //s}
+
+                mdTimerHall2.reschedule(now.plusMinutes(interval))
             }
         }
 	}
@@ -58,6 +107,8 @@ then
         if((current.isAfter(evening) && current.isBefore(dayStart.plusMillis(-1))) ||
            (current.isAfter(dayStart) && current.isBefore(morning)))
         {
+            logInfo("Sensor hall 1", Light_Corridor_RGB_Red.toString)
+
             if(Light_Corridor_RGB_Red.state == NULL || Light_Corridor_RGB_Red.state == 0)
             {
 		        Light_Corridor_RGB_Red.sendCommand(maxLightVal)
@@ -83,7 +134,5 @@ then
 	}
 end
 
-// TODO: Включать, если больше ничего не включено; 
-//       выключать, если включаются лампы; 
-//       использовать восход-заход; 
+// TODO:
 //       использовать освещённость
