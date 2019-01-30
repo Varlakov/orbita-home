@@ -195,11 +195,6 @@ Number Temp_Balkon_Mode     "Режим работы"
 Number Temp_Bath_Mode     "Режим работы"
 
 
-Number Weather_Temperature   "Температура на улице [%.1f °C]" <temperature> ["CurrentTemperature"] { channel="yahooweather:weather:minsk:temperature" }
-Number Weather_Humidity      "Влажность на улице [%.1f]" <humidity> { channel="yahooweather:weather:minsk:humidity" }
-
-
-
 String Contact_5_1      "Contact_TEST" (gVirtContact)   ["SClick:Light_Servernaya_Ceiling:Toggle"]
 
 Group gSetpointBath
@@ -276,7 +271,14 @@ Number Temp_Bath_SetMinute10 "Минуты  10"   (gSetpointBath)
 // -----------     Astro   ----------   https://voshod-solnca.ru/минск.html
 DateTime Sunrise_Time	"Восход [%1$tH:%1$tM]" <sunrise>   (gExternal)  {channel = "astro:sun:home:rise#start"}
 DateTime Sunset_Time    "Закат  [%1$tH:%1$tM]" <sunset>    (gExternal)  {channel = "astro:sun:home:set#end"}
-
-//DateTime DayLightStart_Time	"Рассвет [%1$tH:%1$tM]" (gExternal) {channel = "astro:sun:home:daylight#start" }
-//DateTime DayLigtEnd_Time	"Сумерки [%1$tH:%1$tM]" (gExternal) {channel = "astro:sun:home:daylight#end"}
 // -------
+
+
+// -----------    https://openweathermap.org/city  ------------------------
+Number   Temperature        "Температура [%.2f °C]"     <temperature>   {weather="locationId=home-inst, type=temperature, property=current"}
+Number   Humidity           "Влажность [%d %%]"         <humidity>      {weather="locationId=home-inst, type=atmosphere, property=humidity"}
+Number   Clouds             "Облачность [%d %%]"        <sun_clouds>    {weather="locationId=home-inst, type=clouds, property=percent"}
+Number   Pressure           "Давление [%d hpa]"         <pressure>      {weather="locationId=home-inst, type=atmosphere, property=pressure"}
+String   Condition          "Условия [%s]"              <text>          {weather="locationId=home-inst, type=condition, property=text"}
+DateTime LastObservation    "Время наблюдения [%1$td.%1$tm.%1$tY %1$tH:%1$tM]"        <time>    {weather="locationId=home-inst, type=condition, property=observationTime"}
+Number   WindSpeed          "Скорость ветра [%d m/s]"   <wind>          {weather="locationId=home-inst, type=wind, property=speed, unit=mps"}

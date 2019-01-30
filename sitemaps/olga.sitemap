@@ -1,4 +1,4 @@
-sitemap olga label="Main Menu"
+sitemap olga label="Orbita home"
 {
 	Frame{
 		Switch item=Lights mappings=[OFF="Выкл всё"] icon="light"
@@ -22,13 +22,6 @@ sitemap olga label="Main Menu"
 		Group item=gBalkony label="Лоджия" icon="garage"
 
 		Text label="Термостаты" icon="line" {
-			Frame label="Погода"{
-				Text item=Weather_Temperature
-				Text item=Weather_Humidity
-
-				Text item=Sunrise_Time
-				Text item=Sunset_Time
-			}
 			Frame label="Балкон" {
 				Setpoint item=Temp_Balkon_SetPoint minValue=0 maxValue=35 step=0.5
 				Text item=Temp_Balkon
@@ -84,7 +77,18 @@ sitemap olga label="Main Menu"
 		}
 	}
 
-
+	Frame label="Погода"{
+		Text item=Sunrise_Time
+		Text item=Sunset_Time
+		Text item=Temperature
+		Text item=Humidity
+		Text item=Clouds
+		Text item=Pressure
+		Text item=Condition
+		Text item=LastObservation
+		Text item=WindSpeed
+	}
+		
 		Frame label="Main Zone" {
 			Switch item=DenonPower
 			Switch item=DenonMainZone

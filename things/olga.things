@@ -1,7 +1,4 @@
-yahooweather:weather:minsk [ location=834463, refresh=300 ]
-
 astro:sun:home   [ geolocation="53.927405,27.608131", interval=60 ]
-
 astro:moon:home  [ geolocation="53.927405,27.608131", interval=60 ]
 
 
